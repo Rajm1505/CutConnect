@@ -33,7 +33,10 @@
                                 <a  ID="NavDashboard" class="nav-link " href="#"  runat="server"></a>
                             </li>
                             <li class="nav-item">
-                                <a  ID="NavMyBookings" visible="false" class="nav-link " href="#"  runat="server">My Bookings</a>
+                                <a  ID="NavMyBookings" visible="false" class="nav-link " href="MyBookings.aspx"  runat="server">My Bookings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a  ID="ManageBookings" visible="false" class="nav-link " href="AllBookings.aspx"  runat="server">Manage Bookings</a>
                             </li>
                             
 

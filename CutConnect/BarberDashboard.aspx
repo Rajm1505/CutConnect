@@ -133,6 +133,9 @@
         <div class="m-auto text-center">
              <h3 class="w-50 m-auto" >Currently Listed Shops</h3>
         </div>
+        <div class="d-flex">
+        <span class="m-auto mt-2 h5 text-danger" ID="message" runat="server"></span>
+        </div>
         <div class="list-group">
       
         <asp:Panel ID="ListedShopsPanel" runat="server"></asp:Panel>

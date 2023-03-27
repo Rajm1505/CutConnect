@@ -22,6 +22,7 @@ public partial class Cart : System.Web.UI.Page
         {
             Response.Redirect("BarberDashboard.aspx");
         }
+       
 
         MySqlConnection conn = new MySqlConnection(conStr);
         conn.Open();
@@ -32,12 +33,25 @@ public partial class Cart : System.Web.UI.Page
 
 
 
+
         MySqlDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
         {
             
             GenerateControls(Convert.ToInt32(reader["serviceid"]), reader["name"].ToString(), reader["price"].ToString());
         }
+        reader.Close();
+        string sql2 = "SELECT shopid, SUM(s.price) as total from services as s, cart as c where c.user_id = @userid and c.service_id = s.serviceid ";
+        MySqlCommand cmd2 = new MySqlCommand(sql2, conn);
+        cmd2.Parameters.AddWithValue("@userid", Session["userid"]);
+        MySqlDataReader reader2 =  cmd2.ExecuteReader();
+        reader2.Read();
+        TotalCartPrice.Visible = true;
+        TotalCartPrice.InnerText = reader2["total"].ToString();
+        Session["shopid"] = reader2["shopid"].ToString();
+
+        reader2.Close();
+        conn.Close();
 
     }
 
@@ -72,5 +86,60 @@ public partial class Cart : System.Web.UI.Page
         span.Controls.Add(div1);
 
         CartItemsPanel.Controls.Add(span);
+    }
+
+    
+
+    protected void BookServicesBtn_Click(object sender, EventArgs e)
+    {
+        BookingFormPanel.Visible = true;
+        CloseBookServicesBtn.Visible = true;
+        BookServicesBtn.Visible = false;
+    }
+
+    protected void ConfirmBookingBtn_Click(object sender, EventArgs e)
+    {
+        MySqlConnection conn = new MySqlConnection(conStr);
+        conn.Open();
+        string sql1 = "select service_id from cart where user_id  = @userid";
+        MySqlCommand cmd1 = new MySqlCommand(sql1, conn);
+        cmd1.Parameters.AddWithValue("@userid", Session["userid"]);
+        MySqlDataReader reader = cmd1.ExecuteReader();
+        string serviceid_list = "";
+        while (reader.Read())
+        {
+
+            serviceid_list += reader["service_id"] + ",";
+            
+        }
+        reader.Close();
+        string sql2 = "insert into booking(shop_id,serviceid_list,total_price,status,appointment_datetime,userid) values(@shop_id,@serviceid_list,@totalprice,'Pending',@appdt,@userid)";
+        MySqlCommand cmd2 = new MySqlCommand(sql2, conn);
+
+        cmd2.Parameters.AddWithValue("@shop_id", Session["shopid"]);
+        cmd2.Parameters.AddWithValue("@serviceid_list", serviceid_list);
+
+        cmd2.Parameters.AddWithValue("@totalprice", Convert.ToInt32(TotalCartPrice.InnerText));
+        cmd2.Parameters.AddWithValue("@appdt", appointmentdatetime.Value);
+        cmd2.Parameters.AddWithValue("@userid", Session["userid"]);
+
+        cmd2.ExecuteNonQuery();
+
+
+        string sql3 = "delete from cart where user_id = @userid";
+        MySqlCommand cmd3 = new MySqlCommand(sql3, conn);
+
+        cmd3.Parameters.AddWithValue("@userid", Session["userid"]);
+
+        cmd3.ExecuteNonQuery();
+        Response.Redirect("Cart.aspx");
+
+    }
+
+    protected void CloseBookServicesBtn_Click(object sender, EventArgs e)
+    {
+        BookingFormPanel.Visible = false;
+        BookServicesBtn.Visible = true;
+        CloseBookServicesBtn.Visible = false;
     }
 }

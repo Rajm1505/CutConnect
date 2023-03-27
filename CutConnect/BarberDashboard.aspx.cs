@@ -13,6 +13,11 @@ public partial class BarberDashboard : System.Web.UI.Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
+        if (Session["message"] != null)
+        {
+        message.InnerText = Session["message"].ToString();
+        Session.Remove("message");
+        }
 
         
         if (Session["role"] == null)
@@ -119,6 +124,8 @@ public partial class BarberDashboard : System.Web.UI.Page
 
         cmd.ExecuteNonQuery();
         conn.Close();
+        Session["message"] = "Shop Created Successfully!";
+        
 
         if (IsPostBack)
         {

@@ -19,7 +19,7 @@ public partial class ViewShop : System.Web.UI.Page
         }
         if (Session["role"].ToString() == "b")
         {
-            Response.Redirect("CustomerDashboard.aspx");
+            Response.Redirect("BarberDashboard.aspx");
         }
 
         MySqlConnection conn = new MySqlConnection(conStr);
@@ -96,7 +96,7 @@ public partial class ViewShop : System.Web.UI.Page
         BookServiceBtn.UseSubmitBehavior = false;
         BookServiceBtn.ID = "BookServiceBtn" + serviceid;
 
-        BookServiceBtn.Text = "Book";
+        BookServiceBtn.Text = "Add to Cart";
         BookServiceBtn.CommandArgument = serviceid.ToString();
         BookServiceBtn.Click += new EventHandler(BookServiceBtn_OnClick);
 
@@ -123,20 +123,70 @@ public partial class ViewShop : System.Web.UI.Page
 
         int serviceid = Convert.ToInt32(btn.ID.Substring(14));
 
-        MySqlConnection conn = new MySqlConnection(conStr);
+        MySqlConnection conn = new MySqlConnection(conStr); 
         conn.Open();
-        string sql = "insert into cart(service_id,user_id) values(@service_id,@userid)";
+            
+        string sql = "select cart_id from cart where user_id = @userid";
         MySqlCommand cmd = new MySqlCommand(sql, conn);
 
-        cmd.Parameters.AddWithValue("@service_id", serviceid);
         cmd.Parameters.AddWithValue("@userid",Session["userid"]);
 
-        cmd.ExecuteNonQuery();
-        conn.Close();
-        btn.Text = "Booked";
-        }
+        MySqlDataReader reader =  cmd.ExecuteReader();
+            
+            if (!reader.Read())
+            {
+                reader.Close();
+                insertIntoCart(serviceid);
+                
+                
+                string sql2 = "select sh.shop_id, sh.name as name from services as se, shop as sh where se.serviceid = @serviceid and sh.shop_id = se.shopid";
+                MySqlCommand cmd3 = new MySqlCommand(sql2, conn);
+                cmd3.Parameters.AddWithValue("@serviceid", serviceid);
+                MySqlDataReader reader2 = cmd3.ExecuteReader();
+                reader2.Read();
+                Session["shopid"] = reader2["shop_id"];
+                Session["shopname"] = reader2["name"];
+                
+                btn.Text = "Added";
+            }
+            else
+            {
+                reader.Close();
+                string sql2 = "select shopid from services where serviceid = @serviceid";
+                MySqlCommand cmd2 = new MySqlCommand(sql2, conn);
+                cmd2.Parameters.AddWithValue("@serviceid", serviceid);
+                MySqlDataReader reader2 = cmd2.ExecuteReader();
+                reader2.Read();
+                if(reader2["shopid"].ToString() != Session["shopid"].ToString())
+                {
+                    failmsg.InnerText = "You already have services of "+ Session["shopname"] + "in Cart. Cannot Add Services from another shop!";
+                }
+                else
+                {
+                    insertIntoCart(serviceid);
+                }
 
+            }
+            conn.Close();
+        }
+        void insertIntoCart(int serviceid)
+        {
+            MySqlConnection conn = new MySqlConnection(conStr);
+            conn.Open();
+            string sql2 = "insert into cart(service_id,user_id) values(@service_id,@userid) ON DUPLICATE KEY UPDATE service_id = @service_id";
+            MySqlCommand cmd2 = new MySqlCommand(sql2, conn);
+
+            cmd2.Parameters.AddWithValue("@service_id", serviceid);
+            cmd2.Parameters.AddWithValue("@userid", Session["userid"]);
+
+            cmd2.ExecuteNonQuery();
+            conn.Close();
+            btn.Text = "Added";
+
+        }
     }
+
+   
 }
 
     

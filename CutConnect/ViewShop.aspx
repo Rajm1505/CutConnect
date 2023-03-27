@@ -27,6 +27,10 @@
                 </div>
                 <div class="container w-75 mt-3">
                     <h2 class="text-center">Services</h2>
+                    <div class="d-flex">
+
+                    <span class="m-auto text-danger h4" id="failmsg" runat="server"></span>
+                    </div>
                     <div class="list-group mb-5">
 
                     <asp:Panel ID="ServicesPanel" runat="server">

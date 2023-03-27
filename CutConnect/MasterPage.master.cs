@@ -25,6 +25,7 @@ public partial class MasterPage : System.Web.UI.MasterPage
             {
                 NavDashboard.HRef = "BarberDashboard.aspx";
                 NavDashboard.InnerText = "Shops";
+                ManageBookings.Visible = true;
             }
         }
         else

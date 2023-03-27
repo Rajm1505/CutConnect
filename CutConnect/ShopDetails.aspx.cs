@@ -14,6 +14,16 @@ public partial class ShopDetails : System.Web.UI.Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
+
+        if (Session["role"] == null)
+        {
+            Response.Redirect("Login.aspx");
+        }
+        if (Session["role"].ToString() == "c")
+        {
+            Response.Redirect("CustomerDashboard.aspx");
+        }
+
         MySqlConnection conn = new MySqlConnection(conStr);
         conn.Open();
         string sql = "select * from shop where shop_id=@shop_id";
@@ -172,6 +182,7 @@ public partial class ShopDetails : System.Web.UI.Page
         cmd.Parameters.AddWithValue("@shop_id", Request.QueryString["id"]);
 
         cmd.ExecuteNonQuery();
+        Session["message"] = "Shop Deleted Successfully with all its services and bookings!";
         Response.Redirect("BarberDashboard.aspx");
     }
 
